@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- iOS Ana Ekran Ayarları ve Uygulama Simgesi -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Gelir Gider">
+    
+    <!-- Ana Ekran Simgesi (Logo) -->
+    <link rel="apple-touch-icon" href="https://i.ibb.co/fdZt2zYf/MG-2683.jpg">
+    <link rel="icon" type="image/jpeg" href="https://i.ibb.co/fdZt2zYf/MG-2683.jpg">
+    
+    <title>Gelir Gider Takibi</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            background-color: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            color: #ffffff;
+        }
+
+        /* 1. GİRİŞ EKRANI */
+        .login-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #000000;
+            gap: 20px;
+            padding: 20px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .img-wrapper img {
+            width: 110px;
+            height: 110px;
+            object-fit: contain;
+        }
+
+        .login-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .login-box input[type="password"] {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            border: 1px solid #2c2c2e;
+            border-radius: 12px;
+            outline: none;
+            text-align: center;
+            background-color: #1c1c1e;
+            color: #ffffff;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            background-color: #0a84ff;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        .login-box button:active {
+            opacity: 0.7;
+        }
+
+        .error-msg {
+            color: #ff453a;
+            font-size: 14px;
+            font-weight: 500;
+            height: 18px;
+            text-align: center;
+        }
+
+        /* 2. ANA UYGULAMA EKRANI */
+        .app-screen {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            padding: 3px 5px 0 5px;
+            gap: 3px;
+            overflow: hidden;
+            background-color: #000000;
+            width: 100%;
+            height: 100%;
+        }
+
+        .small-logo-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1px 0;
+            flex-shrink: 0;
+        }
+
+        .small-logo-wrapper img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        /* 12 AY - 3'LÜ GRID YAPI */
+        .months-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-rows: repeat(4, minmax(0, 1fr));
+            gap: 4px;
+            flex: 1;
+            width: 100%;
+            padding-bottom: 2px;
+            overflow: hidden;
+        }
+
+        .month-card {
+            background-color: #1c1c1e;
+            border: 1px solid #2c2c2e;
+            border-radius: 9px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 3px 2px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .month-card:active {
+            background-color: #2c2c2e;
+            transform: scale(0.97);
+        }
+
+        .month-name {
+            font-weight: 700;
+            font-size: 10px;
+            color: #0a84ff;
+            text-align: center;
+            line-height: 1.1;
+            margin-bottom: 1px;
+            flex-shrink: 0;
+        }
+
+        /* AYIN İÇİNDEKİ SABİT KALEM LİSTESİ */
+        .month-items-preview {
+            display: flex;
+            flex-direction: column;
+            gap: 0px;
+            width: 100%;
+            flex: 1;
+            justify-content: space-between;
+            overflow: hidden;
+            padding: 1px 0;
+        }
+
+        .preview-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 6.7px;
+            color: #d1d1d6;
+            width: 100%;
+            padding: 0 1px;
+            line-height: 1.05;
+        }
+
+        .preview-label {
+            display: flex;
+            align-items: center;
+            gap: 1.5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 65%;
+        }
+
+        .preview-label span {
+            font-size: 7px;
+        }
+
+        .preview-val-gelir { color: #30d158; font-weight: 600; white-space: nowrap; }
+        .preview-val-gider { color: #ff453a; font-weight: 600; white-space: nowrap; }
+        .preview-val-zero { color: #8e8e93; white-space: nowrap; }
+
+        .month-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            border-top: 1px solid #3a3a3c;
+            padding-top: 1.5px;
+            margin-top: 1px;
+            font-size: 8px;
+            font-weight: 600;
+            line-height: 1.1;
+            flex-shrink: 0;
+        }
+
+        .sum-bakiye-lbl { color: #8e8e93; font-size: 7.5px; }
+        .sum-bakiye-val { color: #ffffff; font-size: 8px; }
+
+        /* 3. AY DETAY SAYFASI */
+        .month-detail-screen {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            gap: 6px;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1c1c1e;
+            padding: 6px 10px;
+            border-radius: 10px;
+            border: 1px solid #2c2c2e;
+            flex-shrink: 0;
+        }
+
+        .detail-header h2 {
+            font-size: 14px;
+            color: #ffffff;
+        }
+
+        .back-btn {
+            background-color: #0a84ff;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .ios-table-container {
+            flex: 1;
+            overflow-y: auto;
+            background: #1c1c1e;
+            border-radius: 10px;
+            border: 1px solid #48484a;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        th, td {
+            border: 1px solid #48484a;
+            padding: 6px 3px;
+            text-align: center;
+            font-size: 11px;
+            color: #ffffff;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #2c2c2e;
+            color: #8e8e93;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .item-input {
+            width: 100%;
+            background: #2c2c2e;
+            border: 1px solid #3a3a3c;
+            border-radius: 6px;
+            color: #ffffff;
+            text-align: center;
+            padding: 4px;
+            font-size: 11px;
+            outline: none;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+
+        .txt-gelir { color: #30d158; font-weight: 600; }
+        .txt-gider { color: #ff453a; font-weight: 600; }
+
+        /* Ekstra Ekleme Form Alanı */
+        .extra-form-box {
+            background: #1c1c1e;
+            border-radius: 10px;
+            padding: 6px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            border: 1px solid #2c2c2e;
+            flex-shrink: 0;
+        }
+
+        .extra-form-row {
+            display: flex;
+            gap: 4px;
+        }
+
+        .extra-form-box input, .extra-form-box select {
+            background: #2c2c2e;
+            border: 1px solid #3a3a3c;
+            border-radius: 6px;
+            color: #ffffff;
+            padding: 5px;
+            font-size: 11px;
+            outline: none;
+            text-align: center;
+        }
+
+        .extra-add-btn {
+            background-color: #30d158;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .extra-add-btn:active { opacity: 0.7; }
+
+        .delete-btn {
+            background-color: #ff453a;
+            color: white;
+            border: none;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .phone-footer {
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 8px;
+            font-size: 10px;
+            color: #8e8e93;
+            background-color: #000000;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- GİRİŞ EKRANI -->
+    <div class="login-screen" id="loginScreen">
+        <div class="img-wrapper">
+            <img src="https://i.ibb.co/fdZt2zYf/MG-2683.jpg" alt="Logo">
+        </div>
+
+        <div class="login-box">
+            <input type="password" id="passInput" placeholder="Şifrenizi Girin" autofocus>
+            <button type="button" onclick="sifreKontrol()">Giriş Yap</button>
+            <div class="error-msg" id="errorText"></div>
+        </div>
+    </div>
+
+    <!-- ANA EKRAN (AYLAR GRID) -->
+    <div class="app-screen" id="appScreen">
+        
+        <div class="small-logo-wrapper">
+            <img src="https://i.ibb.co/fdZt2zYf/MG-2683.jpg" alt="EB Logo">
+        </div>
+
+        <!-- 12 AY GRID -->
+        <div class="months-grid" id="monthsGrid"></div>
+
+        <!-- AY DETAY SAYFASI (SABİT KALEMLER + EKSTRA GELİR/GİDER) -->
+        <div class="month-detail-screen" id="monthDetailScreen">
+            <div class="detail-header">
+                <button class="back-btn" onclick="aylaraDon()">‹ Aylara Dön</button>
+                <h2 id="selectedMonthTitle">Ocak</h2>
+            </div>
+
+            <div class="ios-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 42%;">Kalem</th>
+                            <th style="width: 25%;">Tür</th>
+                            <th style="width: 33%;">Tutar (₺)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+
+            <!-- EKSTRA KALEM (GELİR / GİDER) EKLEME FORMU -->
+            <div class="extra-form-box">
+                <div style="font-size: 11px; font-weight:600; color:#0a84ff; text-align:center;">+ Ekstra Gelir / Harcama Ekle</div>
+                <div class="extra-form-row">
+                    <input type="text" id="exSimge" placeholder="Emoji (Örn: 💰)" style="width: 20%;">
+                    <input type="text" id="exAd" placeholder="Açıklama (Örn: Prim)" style="width: 40%;">
+                    <select id="exTur" style="width: 40%;">
+                        <option value="gider">Gider (-)</option>
+                        <option value="gelir">Gelir (+)</option>
+                    </select>
+                </div>
+                <div class="extra-form-row">
+                    <select id="exHedef" style="flex: 1;"></select>
+                    <input type="number" id="exTutar" placeholder="Tutar (₺)" style="width: 32%;" step="any">
+                    <button class="extra-add-btn" onclick="ekstraKalemEkle()">Ekle</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="phone-footer">
+        <span>ErsNByhN® 2026</span>
+    </div>
+
+    <script>
+        const aylar = [
+            "Ocak", "Şubat", "Mart", "Nisan", 
+            "Mayıs", "Haziran", "Temmuz", "Ağustos", 
+            "Eylül", "Ekim", "Kasım", "Aralık"
+        ];
+
+        // İstenen Sırayla Sabit Kalemler
+        const sabitKalemler = [
+            { ad: "Maaş", simge: "💵", tur: "gelir" },
+            { ad: "Kredi", simge: "🏦", tur: "gider" },
+            { ad: "K.Kartı", simge: "💳", tur: "gider" },
+            { ad: "Elektrik", simge: "⚡", tur: "gider" },
+            { ad: "Su", simge: "💧", tur: "gider" },
+            { ad: "Doğalgaz", simge: "🔥", tur: "gider" },
+            { ad: "İnternet", simge: "🌐", tur: "gider" },
+            { ad: "Ersin cep", simge: "📱", tur: "gider" },
+            { ad: "Nurhayat cep", simge: "📱", tur: "gider" },
+            { ad: "Emre cep", simge: "📱", tur: "gider" },
+            { ad: "Avans", simge: "💰", tur: "gelir" },
+            { ad: "Aidat", simge: "🏢", tur: "gider" },
+            { ad: "Diğer", simge: "📌", tur: "gider" }
+        ];
+
+        let aktifAyIndex = null;
+
+        // Hedef seçiciyi sabit kalemlere göre doldur
+        (function hedefSecenekleriniDoldur() {
+            const select = document.getElementById("exHedef");
+            sabitKalemler.forEach((kalem, idx) => {
+                const opt = document.createElement("option");
+                opt.value = idx;
+                opt.textContent = `${kalem.simge} ${kalem.ad} (Ekle)`;
+                select.appendChild(opt);
+            });
+            // Varsayılan olarak 'Diğer' seçili gelsin
+            select.value = sabitKalemler.length - 1;
+        })();
+
+        document.getElementById("passInput").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                sifreKontrol();
+            }
+        });
+
+        function sifreKontrol() {
+            var girilenSifre = document.getElementById("passInput").value;
+            if (girilenSifre === "8290028") {
+                document.getElementById("loginScreen").style.display = "none";
+                document.getElementById("appScreen").style.display = "flex";
+                aylariOlustur();
+            } else {
+                document.getElementById("errorText").innerText = "Hatalı şifre!";
+                document.getElementById("passInput").value = "";
+                document.getElementById("passInput").focus();
+            }
+        }
+
+        function tumVerileriAl() {
+            var veriler = localStorage.getItem("gelirGiderSabitData_v5");
+            return veriler ? JSON.parse(veriler) : {};
+        }
+
+        function tumVerileriKaydet(data) {
+            localStorage.setItem("gelirGiderSabitData_v5", JSON.stringify(data));
+        }
+
+        function aylariOlustur() {
+            const grid = document.getElementById("monthsGrid");
+            grid.style.display = "grid";
+            document.getElementById("monthDetailScreen").style.display = "none";
+            grid.innerHTML = "";
+
+            const tumVeriler = tumVerileriAl();
+
+            aylar.forEach((ay, index) => {
+                const ayVerisi = tumVeriler[index] || { sabit: {}, ekstra: [] };
+                let toplamGelir = 0;
+                let toplamGider = 0;
+
+                let previewHTML = "";
+                sabitKalemler.forEach((kalem, kIndex) => {
+                    let tutar = parseFloat(ayVerisi.sabit[kIndex]) || 0;
+
+                    if (ayVerisi.ekstra) {
+                        ayVerisi.ekstra.forEach(ex => {
+                            if (parseInt(ex.hedef) === kIndex) {
+                                tutar += parseFloat(ex.tutar) || 0;
+                            }
+                        });
+                    }
+
+                    if (kalem.tur === "gelir") toplamGelir += tutar;
+                    else toplamGider += tutar;
+
+                    let valClass = "preview-val-zero";
+                    let formatTutar = "-";
+
+                    if (tutar > 0) {
+                        valClass = kalem.tur === "gelir" ? "preview-val-gelir" : "preview-val-gider";
+                        formatTutar = tutar.toLocaleString('tr-TR') + "₺";
+                    }
+                    
+                    previewHTML += `
+                        <div class="preview-row">
+                            <span class="preview-label"><span>${kalem.simge}</span>${kalem.ad}</span>
+                            <span class="${valClass}">${formatTutar}</span>
+                        </div>
+                    `;
+                });
+
+                let bakiye = toplamGelir - toplamGider;
+
+                const card = document.createElement("div");
+                card.className = "month-card";
+                card.onclick = () => ayDetayAc(index);
+
+                card.innerHTML = `
+                    <div class="month-name">${ay}</div>
+                    <div class="month-items-preview">
+                        ${previewHTML}
+                    </div>
+                    <div class="month-summary">
+                        <span class="sum-bakiye-lbl">Kalan:</span>
+                        <span class="sum-bakiye-val">${bakiye.toLocaleString('tr-TR')}₺</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function ayDetayAc(index) {
+            aktifAyIndex = index;
+            document.getElementById("monthsGrid").style.display = "none";
+            document.getElementById("monthDetailScreen").style.display = "flex";
+            document.getElementById("selectedMonthTitle").innerText = aylar[index] + " Ayı";
+            tabloGuncelle();
+        }
+
+        function aylaraDon() {
+            aktifAyIndex = null;
+            aylariOlustur();
+        }
+
+        function tabloGuncelle() {
+            const tbody = document.getElementById("tableBody");
+            tbody.innerHTML = "";
+
+            const tumVeriler = tumVerileriAl();
+            const ayVerisi = tumVeriler[aktifAyIndex] || { sabit: {}, ekstra: [] };
+
+            sabitKalemler.forEach((kalem, kIndex) => {
+                const row = tbody.insertRow();
+                const isGelir = kalem.tur === "gelir";
+                const turClass = isGelir ? "txt-gelir" : "txt-gider";
+                const turEtiket = isGelir ? "Gelir (+)" : "Gider (-)";
+                const mevcutTutar = ayVerisi.sabit[kIndex] !== undefined ? ayVerisi.sabit[kIndex] : "";
+
+                row.insertCell(0).innerHTML = `${kalem.simge} ${kalem.ad}`;
+                
+                const cellTur = row.insertCell(1);
+                cellTur.innerText = turEtiket;
+                cellTur.className = turClass;
+
+                const cellTutar = row.insertCell(2);
+                cellTutar.innerHTML = `<input type="number" class="item-input" placeholder="0" value="${mevcutTutar}" oninput="sabitTutarGuncelle(${kIndex}, this.value)" step="any">`;
+            });
+
+            if (ayVerisi.ekstra && ayVerisi.ekstra.length > 0) {
+                ayVerisi.ekstra.forEach((ex, eIndex) => {
+                    const row = tbody.insertRow();
+                    const isGelir = ex.tur === "gelir";
+                    const turClass = isGelir ? "txt-gelir" : "txt-gider";
+                    const turEtiket = isGelir ? "Gelir (+)" : "Gider (-)";
+
+                    row.insertCell(0).innerHTML = `${ex.simge || (isGelir ? '💰' : '📌')} ${ex.ad}`;
+                    
+                    const cellTur = row.insertCell(1);
+                    cellTur.innerText = turEtiket;
+                    cellTur.className = turClass;
+
+                    const cellTutar = row.insertCell(2);
+                    cellTutar.innerHTML = `
+                        <div style="display:flex; align-items:center; justify-content:center; gap:4px;">
+                            <span class="${turClass}" style="font-size:11px;">${parseFloat(ex.tutar).toLocaleString('tr-TR')}₺</span>
+                            <button class="delete-btn" onclick="ekstraKalemSil(${eIndex})">Sil</button>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        function sabitTutarGuncelle(kIndex, deger) {
+            const tumVeriler = tumVerileriAl();
+            if (!tumVeriler[aktifAyIndex]) {
+                tumVeriler[aktifAyIndex] = { sabit: {}, ekstra: [] };
+            }
+            if (!tumVeriler[aktifAyIndex].sabit) {
+                tumVeriler[aktifAyIndex].sabit = {};
+            }
+
+            if (deger === "" || parseFloat(deger) < 0) {
+                delete tumVeriler[aktifAyIndex].sabit[kIndex];
+            } else {
+                tumVeriler[aktifAyIndex].sabit[kIndex] = parseFloat(deger);
+            }
+
+            tumVerileriKaydet(tumVeriler);
+        }
+
+        function ekstraKalemEkle() {
+            const tur = document.getElementById("exTur").value;
+            const simge = document.getElementById("exSimge").value.trim() || (tur === "gelir" ? "💰" : "📌");
+            const ad = document.getElementById("exAd").value.trim();
+            const hedef = document.getElementById("exHedef").value;
+            const tutar = document.getElementById("exTutar").value;
+
+            if (!ad || !tutar || tutar <= 0) {
+                alert("Lütfen açıklama ve geçerli bir tutar girin!");
+                return;
+            }
+
+            const tumVeriler = tumVerileriAl();
+            if (!tumVeriler[aktifAyIndex]) {
+                tumVeriler[aktifAyIndex] = { sabit: {}, ekstra: [] };
+            }
+            if (!tumVeriler[aktifAyIndex].ekstra) {
+                tumVeriler[aktifAyIndex].ekstra = [];
+            }
+
+            tumVeriler[aktifAyIndex].ekstra.push({
+                tur: tur,
+                simge: simge,
+                ad: ad,
+                hedef: parseInt(hedef),
+                tutar: parseFloat(tutar)
+            });
+
+            tumVerileriKaydet(tumVeriler);
+
+            document.getElementById("exSimge").value = "";
+            document.getElementById("exAd").value = "";
+            document.getElementById("exTutar").value = "";
+
+            tabloGuncelle();
+        }
+
+        function ekstraKalemSil(eIndex) {
+            const tumVeriler = tumVerileriAl();
+            if (tumVeriler[aktifAyIndex] && tumVeriler[aktifAyIndex].ekstra) {
+                tumVeriler[aktifAyIndex].ekstra.splice(eIndex, 1);
+                tumVerileriKaydet(tumVeriler);
+                tabloGuncelle();
+            }
+        }
+    </script>
+</body>
+</html>
